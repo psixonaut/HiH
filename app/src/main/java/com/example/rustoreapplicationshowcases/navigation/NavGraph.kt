@@ -30,7 +30,7 @@ fun AppNavHost(
         }
 
         composable("main") {
-            HomeScreen()
+            HomeScreen(nav = navController)
         }
     }
 }
