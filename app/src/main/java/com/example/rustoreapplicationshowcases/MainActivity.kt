@@ -16,7 +16,8 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         val prefs = PreferencesManager(this)
-        val showOnboarding = !prefs.isOnboardingShown()
+        val showOnboarding = true
+        // val showOnboarding = !prefs.isOnboardingShown()
 
         enableEdgeToEdge()
 
