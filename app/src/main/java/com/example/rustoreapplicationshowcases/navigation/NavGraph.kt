@@ -7,28 +7,29 @@ import androidx.navigation.compose.composable
 import com.example.rustoreapplicationshowcases.ui.onboarding.OnboardingScreen
 import com.example.rustoreapplicationshowcases.ui.home.HomeScreen
 
-sealed class Screen(val route: String) {
-    object Onboarding : Screen("onboarding")
-    object Home : Screen("home")
-}
-
 @Composable
-fun AppNavGraph(navController: NavHostController) {
+fun AppNavHost(
+    navController: NavHostController,
+    showOnboarding: Boolean,
+    onFinishOnboarding: () -> Unit
+) {
+
     NavHost(
         navController = navController,
-        startDestination = Screen.Onboarding.route
+        startDestination = if (showOnboarding) "onboarding" else "main"
     ) {
-        composable(Screen.Onboarding.route) {
+        composable("onboarding") {
             OnboardingScreen(
                 onFinish = {
-                    navController.navigate(Screen.Home.route) {
-                        popUpTo(Screen.Onboarding.route) { inclusive = true }
+                    onFinishOnboarding()
+                    navController.navigate("main") {
+                        popUpTo("onboarding") { inclusive = true }
                     }
                 }
             )
         }
 
-        composable(Screen.Home.route) {
+        composable("main") {
             HomeScreen()
         }
     }

@@ -1,84 +1,52 @@
 package com.example.rustoreapplicationshowcases.ui.onboarding
 
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.with
-import androidx.compose.foundation.background
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import com.example.rustoreapplicationshowcases.R
 
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun OnboardingScreen(onFinish: () -> Unit) {
-    var page by remember { mutableStateOf(0) }
-
-    val pages = listOf(
-        "Открывайте мир приложений",
-        "Скачивайте быстро и безопасно",
-        "Лучшие игры и сервисы — в одном месте"
-    )
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
 
-        Spacer(modifier = Modifier.height(80.dp))
+        // Логотип
+        Image(
+            painter = painterResource(id = R.drawable.ic_rustore_logo),
+            contentDescription = "RuStore logo",
+            modifier = Modifier.size(120.dp)
+        )
 
-        AnimatedContent(
-            targetState = page,
-            transitionSpec = { fadeIn() with fadeOut() },
-            modifier = Modifier.weight(1f)
-        ) { targetPage ->
-            Text(
-                text = pages[targetPage],
-                style = MaterialTheme.typography.headlineLarge
-            )
-        }
+        Spacer(modifier = Modifier.height(32.dp))
 
-        Spacer(modifier = Modifier.height(40.dp))
+        // Приветственный текст
+        Text(
+            text = "Добро пожаловать в RuStore!\nОткройте для себя мир российских приложений.",
+            style = MaterialTheme.typography.headlineSmall,
+            modifier = Modifier.padding(horizontal = 16.dp)
+        )
 
-        Row {
-            pages.indices.forEach { index ->
-                val isActive = index == page
-                Box(
-                    modifier = Modifier
-                        .padding(4.dp)
-                        .size(if (isActive) 12.dp else 8.dp)
-                        .background(
-                            color = if (isActive)
-                                MaterialTheme.colorScheme.primary
-                            else
-                                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
-                            shape = MaterialTheme.shapes.small
-                        )
-                )
-            }
-        }
+        Spacer(modifier = Modifier.height(48.dp))
 
-        Spacer(modifier = Modifier.height(40.dp))
-
+        // Кнопка «Начать»
         Button(
-            onClick = {
-                if (page < pages.lastIndex) {
-                    page++
-                } else {
-                    onFinish()
-                }
-            },
+            onClick = onFinish,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text(if (page == pages.lastIndex) "Начать" else "Далее")
+            Text("Начать")
         }
-
-        Spacer(modifier = Modifier.height(40.dp))
     }
 }
