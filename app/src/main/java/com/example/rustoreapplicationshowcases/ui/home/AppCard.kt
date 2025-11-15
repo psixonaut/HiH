@@ -2,6 +2,7 @@ package com.example.rustoreapplicationshowcases.ui.home
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -16,11 +17,16 @@ import com.example.rustoreapplicationshowcases.data.model.AppInfo
 
 @SuppressLint("LocalContextResourcesRead")
 @Composable
-fun AppCard(app: AppInfo, modifier: Modifier = Modifier) {
+fun AppCard(
+    app: AppInfo,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .padding(8.dp),
+            .padding(8.dp)
+            .clickable { onClick() },
         elevation = CardDefaults.cardElevation(4.dp)
     ) {
 
