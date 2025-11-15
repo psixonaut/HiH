@@ -3,11 +3,13 @@ package com.example.rustoreapplicationshowcases.ui.home
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -44,7 +46,8 @@ fun HomeScreen(
                     .fillMaxWidth()
                     .padding(8.dp),
                 placeholder = { Text("Поиск приложений") },
-                singleLine = true
+                singleLine = true,
+                shape = RoundedCornerShape(16.dp) // Тестовое скругление
             )
 
             LazyColumn {

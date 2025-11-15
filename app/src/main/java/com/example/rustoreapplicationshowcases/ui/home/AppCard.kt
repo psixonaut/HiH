@@ -3,6 +3,7 @@ package com.example.rustoreapplicationshowcases.ui.home
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -16,7 +17,8 @@ fun AppCard(app: AppInfo) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp)
+            .padding(8.dp),
+        elevation = CardDefaults.cardElevation(4.dp) // Тестовая тень, может удалим
     ) {
         Row(modifier = Modifier.padding(16.dp)) {
 

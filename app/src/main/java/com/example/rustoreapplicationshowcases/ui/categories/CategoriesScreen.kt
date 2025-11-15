@@ -27,6 +27,13 @@ fun CategoriesScreen(
             modifier = Modifier.padding(padding)
         ) {
 
+            items(categories.size) { idx ->
+                CategoryItem(
+                    title = categories[idx],
+                    onClick = { onCategoryClick(categories[idx]) }
+                )
+            }
+
             item {
                 TextButton(
                     onClick = { onCategoryClick(null) },
@@ -34,13 +41,6 @@ fun CategoriesScreen(
                 ) {
                     Text("Сброс категории")
                 }
-            }
-
-            items(categories.size) { idx ->
-                CategoryItem(
-                    title = categories[idx],
-                    onClick = { onCategoryClick(categories[idx]) }
-                )
             }
         }
     }
