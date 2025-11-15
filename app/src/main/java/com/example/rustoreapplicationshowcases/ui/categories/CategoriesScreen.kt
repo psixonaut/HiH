@@ -3,6 +3,8 @@ package com.example.rustoreapplicationshowcases.ui.categories
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.*
+import androidx.compose.ui.res.painterResource
+import com.example.rustoreapplicationshowcases.R
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.ui.Modifier
@@ -14,6 +16,8 @@ import com.example.rustoreapplicationshowcases.AppViewModelFactory
 @Composable
 fun CategoriesScreen(
     onCategoryClick: (String?) -> Unit,
+    onToggleTheme: () -> Unit = {},
+    isDarkTheme: Boolean = false
 ) {
     val context = LocalContext.current.applicationContext as Application
     val viewModel: CategoriesViewModel = viewModel(
@@ -25,7 +29,17 @@ fun CategoriesScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Категории") }
+                title = { Text("Категории") },
+                actions = {
+                    IconButton(onClick = onToggleTheme) {
+                        Icon(
+                            painter = painterResource(
+                                id = if (isDarkTheme) R.drawable.ic_lighttheme else R.drawable.ic_nighttheme
+                            ),
+                            contentDescription = if (isDarkTheme) "Светлая тема" else "Тёмная тема"
+                        )
+                    }
+                }
             )
         }
     ) { padding ->

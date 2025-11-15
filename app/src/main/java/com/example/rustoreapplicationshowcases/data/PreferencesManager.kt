@@ -13,4 +13,12 @@ class PreferencesManager(context: Context) {
     fun setOnboardingShown() {
         prefs.edit().putBoolean("onboarding_shown", true).apply()
     }
+
+    fun getThemePreference(): String? {
+        return prefs.getString("theme_preference", null)
+    }
+
+    fun setThemePreference(theme: String) {
+        prefs.edit().putString("theme_preference", theme).apply()
+    }
 }
