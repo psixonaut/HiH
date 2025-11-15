@@ -1,7 +1,7 @@
 package com.example.rustoreapplicationshowcases.data.repository
 
 import com.example.rustoreapplicationshowcases.R
-import com.example.rustoreapplicationshowcases.ui.home.model.AppInfo
+import com.example.rustoreapplicationshowcases.data.model.AppInfo
 
 object AppRepository {
 
@@ -12,4 +12,7 @@ object AppRepository {
         AppInfo(R.drawable.ic_app_placeholder, "VK", 4.4, "Инструменты"),
         AppInfo(R.drawable.ic_app_placeholder, "War Robots", 4.6, "Игры")
     )
+
+    fun getAllCategories(): List<String> =
+        apps.map { it.category }.distinct()
 }

@@ -1,4 +1,4 @@
-package com.example.rustoreapplicationshowcases.ui.home.model
+package com.example.rustoreapplicationshowcases.data.model
 
 data class AppInfo(
     val icon: Int,

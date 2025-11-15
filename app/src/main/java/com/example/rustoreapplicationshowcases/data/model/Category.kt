@@ -1,4 +1,9 @@
 package com.example.rustoreapplicationshowcases.data.model
 
-class Category {
+enum class Category(val displayName: String) {
+    FINANCE("Финансы"),
+    TOOLS("Инструменты"),
+    GAMES("Игры"),
+    GOVERNMENT("Государственные"),
+    TRANSPORT("Транспорт")
 }
