@@ -26,4 +26,13 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
             .filter { category == null || it.category == category }
             .filter { it.name.contains(searchQuery, ignoreCase = true) }
     }
+
+    fun onAppClicked(app: AppInfo) {
+        app.downloads++
+    }
+
+    fun getTopApps(limit: Int = 5): List<AppInfo> {
+        return apps.sortedByDescending { it.downloads }
+            .take(limit)
+    }
 }

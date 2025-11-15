@@ -104,7 +104,8 @@ fun HomeScreen(
 
                             this.scaleX = scale
                             this.scaleY = scale
-                        }
+                        },
+                        onClick = { viewModel.onAppClicked(app) }
                     )
                 }
             }
