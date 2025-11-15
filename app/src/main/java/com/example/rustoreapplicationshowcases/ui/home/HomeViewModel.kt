@@ -1,15 +1,16 @@
 package com.example.rustoreapplicationshowcases.ui.home
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import com.example.rustoreapplicationshowcases.data.model.AppInfo
 import com.example.rustoreapplicationshowcases.data.repository.AppRepository
 
-class HomeViewModel : ViewModel() {
+class HomeViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val repo = AppRepository
+    private val repo = AppRepository(application)
 
     val apps: List<AppInfo> = repo.apps
 

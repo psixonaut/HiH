@@ -1,0 +1,92 @@
+[
+  {
+    "name": "Сбербанк",
+    "rating": 4.8,
+    "category": "Финансы",
+    "icon": "ic_app_placeholder"
+  },
+  {
+    "name": "Госуслуги",
+    "rating": 4.5,
+    "category": "Государственные",
+    "icon": "ic_app_placeholder"
+  },
+  {
+    "name": "Яндекс Такси",
+    "rating": 4.7,
+    "category": "Транспорт",
+    "icon": "ic_app_placeholder"
+  },
+  {
+    "name": "VK",
+    "rating": 4.4,
+    "category": "Инструменты",
+    "icon": "ic_app_placeholder"
+  },
+  {
+    "name": "War Robots",
+    "rating": 4.6,
+    "category": "Игры",
+    "icon": "ic_app_placeholder"
+  },
+  {
+    "name": "Лента",
+    "rating": 4.3,
+    "category": "Покупки",
+    "icon": "ic_app_placeholder"
+  },
+  {
+    "name": "Почта России",
+    "rating": 4.2,
+    "category": "Государственные",
+    "icon": "ic_app_placeholder"
+  },
+  {
+    "name": "Яндекс Музыка",
+    "rating": 4.7,
+    "category": "Развлечения",
+    "icon": "ic_app_placeholder"
+  },
+  {
+    "name": "OZON",
+    "rating": 4.8,
+    "category": "Покупки",
+    "icon": "ic_app_placeholder"
+  },
+  {
+    "name": "Wildberries",
+    "rating": 4.5,
+    "category": "Покупки",
+    "icon": "ic_app_placeholder"
+  },
+  {
+    "name": "AliExpress Россия",
+    "rating": 4.4,
+    "category": "Покупки",
+    "icon": "ic_app_placeholder"
+  },
+  {
+    "name": "Яндекс Карты",
+    "rating": 4.6,
+    "category": "Навигация",
+    "icon": "ic_app_placeholder"
+  },
+  {
+    "name": "Telegram",
+    "rating": 4.9,
+    "category": "Социальные",
+    "icon": "ic_app_placeholder"
+  },
+  {
+    "name": "Авито",
+    "rating": 4.7,
+    "category": "Инструменты",
+    "icon": "ic_app_placeholder"
+  },
+  {
+    "name": "World of Tanks Blitz",
+    "rating": 4.5,
+    "category": "Игры",
+    "icon": "ic_app_placeholder"
+  }
+]

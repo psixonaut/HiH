@@ -1,17 +1,16 @@
 package com.example.rustoreapplicationshowcases.data.repository
 
-import com.example.rustoreapplicationshowcases.R
+import android.content.Context
+import com.example.rustoreapplicationshowcases.data.local.JsonDataSource
 import com.example.rustoreapplicationshowcases.data.model.AppInfo
 
-object AppRepository {
+class AppRepository(private val context: Context) {
 
-    val apps = listOf(
-        AppInfo(R.drawable.ic_app_placeholder, "Сбербанк", 4.8, "Финансы"),
-        AppInfo(R.drawable.ic_app_placeholder, "Госуслуги", 4.5, "Государственные"),
-        AppInfo(R.drawable.ic_app_placeholder, "Яндекс Такси", 4.7, "Транспорт"),
-        AppInfo(R.drawable.ic_app_placeholder, "VK", 4.4, "Инструменты"),
-        AppInfo(R.drawable.ic_app_placeholder, "War Robots", 4.6, "Игры")
-    )
+    private val dataSource = JsonDataSource(context)
+
+    val apps: List<AppInfo> by lazy {
+        dataSource.loadAppsFromAssets()
+    }
 
     fun getAllCategories(): List<String> =
         apps.map { it.category }.distinct()

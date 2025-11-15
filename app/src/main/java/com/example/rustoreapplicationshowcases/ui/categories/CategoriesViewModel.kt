@@ -1,11 +1,12 @@
 package com.example.rustoreapplicationshowcases.ui.categories
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import com.example.rustoreapplicationshowcases.data.repository.AppRepository
 
-class CategoriesViewModel : ViewModel() {
+class CategoriesViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val repo = AppRepository
+    private val repo = AppRepository(application)
 
     val categories: List<String> = repo.getAllCategories()
 }

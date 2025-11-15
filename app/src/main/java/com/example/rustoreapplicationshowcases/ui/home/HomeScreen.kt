@@ -9,18 +9,24 @@ import androidx.compose.material.icons.filled.List
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import androidx.compose.ui.platform.LocalContext
+import android.app.Application
+import com.example.rustoreapplicationshowcases.AppViewModelFactory
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     nav: NavController,
     categoryFilter: String? = null,
-    viewModel: HomeViewModel = viewModel()
 ) {
+    val context = LocalContext.current.applicationContext as Application
+    val viewModel: HomeViewModel = viewModel(
+        factory = AppViewModelFactory(context)
+    )
+
     val searchQuery = viewModel.searchQuery
     val apps = viewModel.getFilteredApps(categoryFilter)
 
