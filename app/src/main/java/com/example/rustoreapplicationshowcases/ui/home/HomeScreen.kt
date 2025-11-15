@@ -36,7 +36,9 @@ fun HomeScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Витрина приложений") },
+                title = {
+                    Text(categoryFilter ?: "Главная")
+                },
                 actions = {
                     IconButton(onClick = { nav.navigate("categories") }) {
                         Icon(Icons.Default.List, contentDescription = "Категории")
