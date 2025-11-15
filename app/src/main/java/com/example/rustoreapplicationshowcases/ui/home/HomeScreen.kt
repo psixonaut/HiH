@@ -10,20 +10,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavHostController
-import com.example.rustoreapplicationshowcases.ui.home.AppCard
+import androidx.navigation.NavController
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-    nav: NavHostController,
+    nav: NavController,
     categoryFilter: String? = null,
     viewModel: HomeViewModel = viewModel()
 ) {
-    val apps = if (categoryFilter == null)
-        viewModel.apps
-    else
-        viewModel.apps.filter { it.category == categoryFilter }
+    val searchQuery = viewModel.searchQuery
+    val apps = viewModel.getFilteredApps(categoryFilter)
 
     Scaffold(
         topBar = {
@@ -38,11 +35,22 @@ fun HomeScreen(
         }
     ) { padding ->
 
-        LazyColumn(
-            modifier = Modifier.padding(padding)
-        ) {
-            items(apps) { app ->
-                AppCard(app)
+        Column(modifier = Modifier.padding(padding)) {
+
+            OutlinedTextField(
+                value = searchQuery,
+                onValueChange = { viewModel.onSearchChange(it) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp),
+                placeholder = { Text("Поиск приложений") },
+                singleLine = true
+            )
+
+            LazyColumn {
+                items(apps) { app ->
+                    AppCard(app)
+                }
             }
         }
     }

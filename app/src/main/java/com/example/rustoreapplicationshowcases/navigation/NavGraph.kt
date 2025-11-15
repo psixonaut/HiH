@@ -30,15 +30,11 @@ fun AppNavHost(
             )
         }
 
-        composable("main") {
-            HomeScreen(nav = navController)
-        }
-
         composable("categories") {
             CategoriesScreen(
                 onCategoryClick = { selected ->
                     if (selected == null) {
-                        navController.navigate("main")   // ← сброс фильтра
+                        navController.navigate("main")
                     } else {
                         navController.navigate("category/$selected")
                     }
@@ -46,8 +42,12 @@ fun AppNavHost(
             )
         }
 
+        composable("main") {
+            HomeScreen(nav = navController)
+        }
+
         composable("category/{categoryName}") { backStackEntry ->
-            val category = backStackEntry.arguments?.getString("categoryName") ?: ""
+            val category = backStackEntry.arguments?.getString("categoryName")
             HomeScreen(
                 nav = navController,
                 categoryFilter = category
