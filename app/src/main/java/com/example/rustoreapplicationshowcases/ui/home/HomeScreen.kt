@@ -15,6 +15,9 @@ import androidx.navigation.NavController
 import androidx.compose.ui.platform.LocalContext
 import android.app.Application
 import com.example.rustoreapplicationshowcases.AppViewModelFactory
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.foundation.lazy.itemsIndexed
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -56,9 +59,39 @@ fun HomeScreen(
                 shape = RoundedCornerShape(16.dp) // Тестовое скругление
             )
 
-            LazyColumn {
-                items(apps) { app ->
-                    AppCard(app)
+            val listState = rememberLazyListState()
+
+            LazyColumn(state = listState) {
+
+                itemsIndexed(apps) { index, app ->
+
+                    val itemOffset = when {
+                        listState.firstVisibleItemIndex == index ->
+                            listState.firstVisibleItemScrollOffset
+
+                        listState.firstVisibleItemIndex < index -> 0
+                        else -> 300 // удалённые элементы
+                    }
+
+                    // порог начала затухания (высота строки поиска)
+                    val fadeStart = 0f
+                    val fadeEnd = 350f // чем больше, тем мягче затухание
+
+                    val alpha = ((fadeEnd - itemOffset) / fadeEnd).coerceIn(0f, 1f)
+
+                    AppCard(
+                        app = app,
+                        modifier = Modifier.graphicsLayer {
+                            this.alpha = alpha
+
+                            // минимальный размер при исчезновении
+                            val minScale = 0.85f
+                            val scale = minScale + (alpha * (1f - minScale))
+
+                            this.scaleX = scale
+                            this.scaleY = scale
+                        }
+                    )
                 }
             }
         }

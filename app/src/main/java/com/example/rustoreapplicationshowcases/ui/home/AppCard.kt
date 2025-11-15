@@ -16,34 +16,42 @@ import com.example.rustoreapplicationshowcases.data.model.AppInfo
 
 @SuppressLint("LocalContextResourcesRead")
 @Composable
-fun AppCard(app: AppInfo) {
-
-    val context = LocalContext.current
-
-    val iconResId = context.resources.getIdentifier(app.icon, "drawable", context.packageName)
-
+fun AppCard(app: AppInfo, modifier: Modifier = Modifier) {
     Card(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(8.dp),
-        elevation = CardDefaults.cardElevation(4.dp) // Тестовая тень, может удалим
+        elevation = CardDefaults.cardElevation(4.dp)
     ) {
-        Row(modifier = Modifier.padding(16.dp)) {
 
-            val iconResId = context.resources.getIdentifier(app.icon, "drawable", context.packageName)
+        val context = LocalContext.current
 
-            Image(
-                painter = painterResource(id = iconResId),
-                contentDescription = app.name,
-                modifier = Modifier.size(56.dp)
-            )
+        val iconResId = context.resources.getIdentifier(app.icon, "drawable", context.packageName)
 
-            Spacer(modifier = Modifier.width(16.dp))
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp),
+            elevation = CardDefaults.cardElevation(4.dp) // Тестовая тень, может удалим
+        ) {
+            Row(modifier = Modifier.padding(16.dp)) {
 
-            Column {
-                Text(app.name, style = MaterialTheme.typography.titleMedium)
-                Text("Оценка: ${app.rating}", style = MaterialTheme.typography.bodyMedium)
-                Text(app.category, style = MaterialTheme.typography.labelMedium)
+                val iconResId =
+                    context.resources.getIdentifier(app.icon, "drawable", context.packageName)
+
+                Image(
+                    painter = painterResource(id = iconResId),
+                    contentDescription = app.name,
+                    modifier = Modifier.size(56.dp)
+                )
+
+                Spacer(modifier = Modifier.width(16.dp))
+
+                Column {
+                    Text(app.name, style = MaterialTheme.typography.titleMedium)
+                    Text("Оценка: ${app.rating}", style = MaterialTheme.typography.bodyMedium)
+                    Text(app.category, style = MaterialTheme.typography.labelMedium)
+                }
             }
         }
     }
