@@ -3,90 +3,90 @@
     "name": "Сбербанк",
     "rating": 4.8,
     "category": "Финансы",
-    "icon": "ic_app_placeholder"
+    "icon": "ic_rustoresvglogo"
   },
   {
     "name": "Госуслуги",
     "rating": 4.5,
     "category": "Государственные",
-    "icon": "ic_app_placeholder"
+    "icon": "ic_rustoresvglogo"
   },
   {
     "name": "Яндекс Такси",
     "rating": 4.7,
     "category": "Транспорт",
-    "icon": "ic_app_placeholder"
+    "icon": "ic_rustoresvglogo"
   },
   {
     "name": "VK",
     "rating": 4.4,
     "category": "Инструменты",
-    "icon": "ic_app_placeholder"
+    "icon": "ic_rustoresvglogo"
   },
   {
     "name": "War Robots",
     "rating": 4.6,
     "category": "Игры",
-    "icon": "ic_app_placeholder"
+    "icon": "ic_rustoresvglogo"
   },
   {
     "name": "Лента",
     "rating": 4.3,
     "category": "Покупки",
-    "icon": "ic_app_placeholder"
+    "icon": "ic_rustoresvglogo"
   },
   {
     "name": "Почта России",
     "rating": 4.2,
     "category": "Государственные",
-    "icon": "ic_app_placeholder"
+    "icon": "ic_rustoresvglogo"
   },
   {
     "name": "Яндекс Музыка",
     "rating": 4.7,
     "category": "Развлечения",
-    "icon": "ic_app_placeholder"
+    "icon": "ic_rustoresvglogo"
   },
   {
     "name": "OZON",
     "rating": 4.8,
     "category": "Покупки",
-    "icon": "ic_app_placeholder"
+    "icon": "ic_rustoresvglogo"
   },
   {
     "name": "Wildberries",
     "rating": 4.5,
     "category": "Покупки",
-    "icon": "ic_app_placeholder"
+    "icon": "ic_rustoresvglogo"
   },
   {
     "name": "AliExpress Россия",
     "rating": 4.4,
     "category": "Покупки",
-    "icon": "ic_app_placeholder"
+    "icon": "ic_rustoresvglogo"
   },
   {
     "name": "Яндекс Карты",
     "rating": 4.6,
     "category": "Навигация",
-    "icon": "ic_app_placeholder"
+    "icon": "ic_rustoresvglogo"
   },
   {
     "name": "Telegram",
     "rating": 4.9,
     "category": "Социальные",
-    "icon": "ic_app_placeholder"
+    "icon": "ic_rustoresvglogo"
   },
   {
     "name": "Авито",
     "rating": 4.7,
     "category": "Инструменты",
-    "icon": "ic_app_placeholder"
+    "icon": "ic_rustoresvglogo"
   },
   {
     "name": "World of Tanks Blitz",
     "rating": 4.5,
     "category": "Игры",
-    "icon": "ic_app_placeholder"
+    "icon": "ic_rustoresvglogo"
   }
 ]

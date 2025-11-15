@@ -2,4 +2,7 @@
 <resources>
 
     <style name="Theme.RuStoreApplicationShowcases" parent="android:Theme.Material.Light.NoActionBar" />
+    
+    <!-- Dark theme variant -->
+    <style name="Theme.RuStoreApplicationShowcases.Dark" parent="android:Theme.Material.NoActionBar" />
 </resources>

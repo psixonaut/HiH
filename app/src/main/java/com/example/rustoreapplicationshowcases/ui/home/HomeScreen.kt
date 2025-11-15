@@ -7,6 +7,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material3.*
+import androidx.compose.ui.res.painterResource
+import com.example.rustoreapplicationshowcases.R
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -24,6 +26,8 @@ import androidx.compose.foundation.lazy.itemsIndexed
 fun HomeScreen(
     nav: NavController,
     categoryFilter: String? = null,
+    onToggleTheme: () -> Unit = {},
+    isDarkTheme: Boolean = false
 ) {
     val context = LocalContext.current.applicationContext as Application
     val viewModel: HomeViewModel = viewModel(
@@ -40,6 +44,14 @@ fun HomeScreen(
                     Text(categoryFilter ?: "Главная")
                 },
                 actions = {
+                    IconButton(onClick = onToggleTheme) {
+                        Icon(
+                            painter = painterResource(
+                                id = if (isDarkTheme) R.drawable.ic_lighttheme else R.drawable.ic_nighttheme
+                            ),
+                            contentDescription = if (isDarkTheme) "Светлая тема" else "Тёмная тема"
+                        )
+                    }
                     IconButton(onClick = { nav.navigate("categories") }) {
                         Icon(Icons.Default.List, contentDescription = "Категории")
                     }

@@ -9,12 +9,24 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
     primary = Purple80,
     secondary = PurpleGrey80,
-    tertiary = Pink80
+    tertiary = Pink80,
+    background = DarkBackground,
+    surface = DarkSurface,
+    surfaceVariant = DarkSurfaceVariant,
+    onPrimary = Color(0xFF000000),
+    onSecondary = Color(0xFF000000),
+    onTertiary = Color(0xFF000000),
+    onBackground = DarkOnBackground,
+    onSurface = DarkOnSurface,
+    onSurfaceVariant = Color(0xFFCAC4D0),
+    outline = Color(0xFF938F99),
+    outlineVariant = Color(0xFF49454F)
 )
 
 private val LightColorScheme = lightColorScheme(
@@ -55,4 +67,25 @@ fun RuStoreApplicationShowcasesTheme(
         typography = Typography,
         content = content
     )
+}
+
+/**
+ * Helper function to determine if dark theme should be used
+ * Checks user preference first, then falls back to system setting
+ */
+@Composable
+fun shouldUseDarkTheme(preferencesManager: com.example.rustoreapplicationshowcases.data.PreferencesManager?): Boolean {
+    val systemDarkTheme = isSystemInDarkTheme()
+    
+    return if (preferencesManager != null) {
+        val themePreference = preferencesManager.getThemePreference()
+        when (themePreference) {
+            "dark" -> true
+            "light" -> false
+            "system", null -> systemDarkTheme
+            else -> systemDarkTheme
+        }
+    } else {
+        systemDarkTheme
+    }
 }

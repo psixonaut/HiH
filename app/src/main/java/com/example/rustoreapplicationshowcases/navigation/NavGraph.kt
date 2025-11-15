@@ -12,7 +12,9 @@ import com.example.rustoreapplicationshowcases.ui.categories.CategoriesScreen
 fun AppNavHost(
     navController: NavHostController,
     showOnboarding: Boolean,
-    onFinishOnboarding: () -> Unit
+    onFinishOnboarding: () -> Unit,
+    onToggleTheme: () -> Unit,
+    isDarkTheme: Boolean
 ) {
 
     NavHost(
@@ -26,7 +28,9 @@ fun AppNavHost(
                     navController.navigate("main") {
                         popUpTo("onboarding") { inclusive = true }
                     }
-                }
+                },
+                onToggleTheme = onToggleTheme,
+                isDarkTheme = isDarkTheme
             )
         }
 
@@ -38,19 +42,27 @@ fun AppNavHost(
                     } else {
                         navController.navigate("category/$selected")
                     }
-                }
+                },
+                onToggleTheme = onToggleTheme,
+                isDarkTheme = isDarkTheme
             )
         }
 
         composable("main") {
-            HomeScreen(nav = navController)
+            HomeScreen(
+                nav = navController,
+                onToggleTheme = onToggleTheme,
+                isDarkTheme = isDarkTheme
+            )
         }
 
         composable("category/{categoryName}") { backStackEntry ->
             val category = backStackEntry.arguments?.getString("categoryName")
             HomeScreen(
                 nav = navController,
-                categoryFilter = category
+                categoryFilter = category,
+                onToggleTheme = onToggleTheme,
+                isDarkTheme = isDarkTheme
             )
         }
     }
