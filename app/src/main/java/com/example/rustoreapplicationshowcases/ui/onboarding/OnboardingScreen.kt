@@ -11,6 +11,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.rustoreapplicationshowcases.R
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.shape.RoundedCornerShape
 
 @Composable
 fun OnboardingScreen(onFinish: () -> Unit) {
@@ -27,15 +32,29 @@ fun OnboardingScreen(onFinish: () -> Unit) {
         Image(
             painter = painterResource(id = R.drawable.ic_rustore_logo),
             contentDescription = "RuStore logo",
-            modifier = Modifier.size(120.dp)
+            modifier = Modifier
+                .size(140.dp)
+                .clip(RoundedCornerShape(30.dp))
         )
 
         Spacer(modifier = Modifier.height(32.dp))
 
         // Приветственный текст
         Text(
-            text = "Добро пожаловать в RuStore!\nОткройте для себя мир российских приложений.",
+            text = "Добро пожаловать в RuStore!",
             style = MaterialTheme.typography.headlineSmall,
+            textAlign = TextAlign.Center,
+            fontSize = 32.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(horizontal = 16.dp)
+        )
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        Text(
+            text = "Откройте для себя мир российских приложений.",
+            style = MaterialTheme.typography.headlineSmall,
+            textAlign = TextAlign.Center,
             modifier = Modifier.padding(horizontal = 16.dp)
         )
 
@@ -46,7 +65,11 @@ fun OnboardingScreen(onFinish: () -> Unit) {
             onClick = onFinish,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Начать")
+            Text(
+                text="Начать",
+                fontSize = 20.sp,
+                modifier = Modifier.padding(horizontal = 16.dp)
+            )
         }
     }
 }
