@@ -7,7 +7,7 @@ import androidx.navigation.compose.composable
 import com.example.rustoreapplicationshowcases.ui.onboarding.OnboardingScreen
 import com.example.rustoreapplicationshowcases.ui.home.HomeScreen
 import com.example.rustoreapplicationshowcases.ui.categories.CategoriesScreen
-
+import com.example.rustoreapplicationshowcases.ui.details.AppDetailsScreen
 @Composable
 fun AppNavHost(
     navController: NavHostController,
@@ -61,6 +61,16 @@ fun AppNavHost(
             HomeScreen(
                 nav = navController,
                 categoryFilter = category,
+                onToggleTheme = onToggleTheme,
+                isDarkTheme = isDarkTheme
+            )
+        }
+        composable("details/{appName}") { backStackEntry ->
+            val appName = backStackEntry.arguments?.getString("appName") ?: ""
+
+            AppDetailsScreen(
+                nav = navController,
+                appName = appName,
                 onToggleTheme = onToggleTheme,
                 isDarkTheme = isDarkTheme
             )

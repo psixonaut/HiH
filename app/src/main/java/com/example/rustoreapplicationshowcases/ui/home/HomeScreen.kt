@@ -20,7 +20,7 @@ import com.example.rustoreapplicationshowcases.AppViewModelFactory
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.foundation.lazy.itemsIndexed
-
+import android.net.Uri
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
@@ -105,7 +105,12 @@ fun HomeScreen(
                             this.scaleX = scale
                             this.scaleY = scale
                         },
-                        onClick = { viewModel.onAppClicked(app) }
+                        onClick = {
+                            viewModel.onAppClicked(app)
+
+                            val encodedName = Uri.encode(app.name)
+                            nav.navigate("details/$encodedName")
+                        }
                     )
                 }
             }
