@@ -48,7 +48,7 @@ fun OnboardingScreen(
             verticalArrangement = Arrangement.Center
         ) {
 
-            // Логотип
+            // Логотип,2
             Image(
                 painter = painterResource(id = R.drawable.ic_rustoresvglogo),
                 contentDescription = "RuStore logo",
