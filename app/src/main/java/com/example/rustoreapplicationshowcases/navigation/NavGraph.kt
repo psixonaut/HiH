@@ -7,11 +7,14 @@ import androidx.navigation.compose.composable
 import com.example.rustoreapplicationshowcases.ui.onboarding.OnboardingScreen
 import com.example.rustoreapplicationshowcases.ui.home.HomeScreen
 import com.example.rustoreapplicationshowcases.ui.categories.CategoriesScreen
+import com.example.rustoreapplicationshowcases.ui.details.AppDetailsScreen
 import com.example.rustoreapplicationshowcases.ui.home.CategorySelectionScreen
 import com.example.rustoreapplicationshowcases.ui.home.CategorySelectionViewModel
 import com.example.rustoreapplicationshowcases.ui.search.SearchScreen
 import com.example.rustoreapplicationshowcases.ui.search.AllCategoriesScreen
 import com.example.rustoreapplicationshowcases.ui.search.CategoryAppsScreen
+import com.example.rustoreapplicationshowcases.ui.profile.ProfileScreen
+import com.example.rustoreapplicationshowcases.ui.admin.AdminScreen
 import androidx.compose.runtime.livedata.observeAsState
 
 @Composable
@@ -84,6 +87,16 @@ fun AppNavHost(
                 isDarkTheme = isDarkTheme
             )
         }
+        composable("details/{appName}") { backStackEntry ->
+            val appName = backStackEntry.arguments?.getString("appName") ?: ""
+
+            AppDetailsScreen(
+                nav = navController,
+                appName = appName,
+                onToggleTheme = onToggleTheme,
+                isDarkTheme = isDarkTheme
+            )
+        }
         
         composable("search") {
             SearchScreen(
@@ -108,6 +121,20 @@ fun AppNavHost(
                 categoryName = category,
                 onToggleTheme = onToggleTheme,
                 isDarkTheme = isDarkTheme
+            )
+        }
+        
+        composable("profile") {
+            ProfileScreen(
+                navController = navController,
+                onToggleTheme = onToggleTheme,
+                isDarkTheme = isDarkTheme
+            )
+        }
+
+        composable("admin") {
+            AdminScreen(
+                navController = navController
             )
         }
     }

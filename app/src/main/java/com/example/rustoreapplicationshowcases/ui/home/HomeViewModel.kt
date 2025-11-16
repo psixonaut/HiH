@@ -2,37 +2,70 @@ package com.example.rustoreapplicationshowcases.ui.home
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.rustoreapplicationshowcases.data.local.SQLiteDataSource
+import com.example.rustoreapplicationshowcases.data.model.AppInfo
+import com.example.rustoreapplicationshowcases.data.model.SortType
+import com.example.rustoreapplicationshowcases.data.repository.AppRepository
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
-import com.example.rustoreapplicationshowcases.data.model.AppInfo
-import com.example.rustoreapplicationshowcases.data.repository.AppRepository
 
 class HomeViewModel(application: Application) : AndroidViewModel(application) {
 
+    private val db = SQLiteDataSource(application)
     private val repo = AppRepository(application)
 
-    val apps: List<AppInfo> = repo.apps
+    private val _apps = MutableStateFlow<List<AppInfo>>(emptyList())
+    val apps: StateFlow<List<AppInfo>> = _apps
 
     var searchQuery by mutableStateOf("")
         private set
+
+    init {
+        loadApps()
+    }
+
+    private fun loadApps() {
+        viewModelScope.launch {
+            // Используем repo.getAllApps(), который учитывает режим администратора
+            _apps.value = repo.getAllApps()
+        }
+    }
 
     fun onSearchChange(newValue: String) {
         searchQuery = newValue
     }
 
     fun getFilteredApps(category: String?): List<AppInfo> {
-        return apps
+        return _apps.value
             .filter { category == null || it.category == category }
             .filter { it.name.contains(searchQuery, ignoreCase = true) }
     }
 
     fun onAppClicked(app: AppInfo) {
-        app.downloads++
+        viewModelScope.launch {
+            repo.updateApp(app)
+            // Обновляем список приложений с учетом режима администратора
+            _apps.value = repo.getAllApps()
+        }
+    }
+    
+    /**
+     * Обновляет список приложений (например, после загрузки из API)
+     */
+    fun refreshApps() {
+        viewModelScope.launch {
+            _apps.value = repo.getAllApps()
+        }
     }
 
     fun getTopApps(limit: Int = 5): List<AppInfo> {
-        return apps.sortedByDescending { it.downloads }
+        return _apps.value
+            .sortedByDescending { it.downloads }
             .take(limit)
     }
 
@@ -42,7 +75,7 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
     
     fun getCategoriesWithAppCount(): List<Pair<String, Int>> {
         return repo.getAllCategories().map { category ->
-            category to apps.count { it.category == category }
+            category to _apps.value.count { it.category == category }
         }.sortedByDescending { it.second }
     }
     
@@ -51,14 +84,31 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
     }
     
     fun getAppsByCategory(category: String): List<AppInfo> {
-        return apps.filter { it.category == category }
+        return _apps.value.filter { it.category == category }
     }
     
     fun searchApps(query: String): List<AppInfo> {
         if (query.isBlank()) return emptyList()
-        return apps.filter { 
+        return _apps.value.filter { 
             it.name.contains(query, ignoreCase = true) ||
             it.category.contains(query, ignoreCase = true)
+        }
+    }
+    
+    /**
+     * Сортирует список приложений по указанному типу
+     */
+    fun sortApps(apps: List<AppInfo>, sortType: SortType): List<AppInfo> {
+        return when (sortType) {
+            SortType.ALPHABETICAL -> {
+                apps.sortedBy { it.name.lowercase() }
+            }
+            SortType.RATING -> {
+                apps.sortedByDescending { it.rating }
+            }
+            SortType.DOWNLOADS -> {
+                apps.sortedByDescending { it.downloads }
+            }
         }
     }
 }

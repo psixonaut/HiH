@@ -11,21 +11,27 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.rustoreapplicationshowcases.R
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.rustoreapplicationshowcases.AppViewModelFactory
 import com.example.rustoreapplicationshowcases.ui.home.HomeViewModel
+import com.example.rustoreapplicationshowcases.ui.common.CustomBottomNavigationBar
+import com.example.rustoreapplicationshowcases.data.model.SortType
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -39,44 +45,142 @@ fun SearchScreen(
         factory = AppViewModelFactory(context)
     )
     
+    // Получаем актуальные данные из StateFlow
+    val appsState = viewModel.apps.collectAsState()
+    val apps = appsState.value
+    
     var searchQuery by remember { mutableStateOf("") }
-    val topCategories = remember { viewModel.getTopCategoriesByAppCount(8) }
-    val searchResults = remember(searchQuery) {
-        if (searchQuery.isBlank()) emptyList() else viewModel.searchApps(searchQuery)
+    
+    // Вычисляем категории на основе актуальных данных
+    val topCategories = remember(apps) {
+        viewModel.getTopCategoriesByAppCount(8)
     }
+    
+           // Состояние сортировки
+           var sortType by remember { mutableStateOf<SortType?>(null) }
+           var showSortMenu by remember { mutableStateOf(false) }
+           
+           // Вычисляем результаты поиска на основе актуальных данных и применяем сортировку
+           val searchResults = remember(searchQuery, apps, sortType) {
+               if (searchQuery.isBlank()) {
+                   emptyList()
+               } else {
+                   val results = viewModel.searchApps(searchQuery)
+                   if (sortType != null) {
+                       viewModel.sortApps(results, sortType!!)
+                   } else {
+                       results
+                   }
+               }
+           }
     val focusRequester = remember { FocusRequester() }
     val keyboardController = LocalSoftwareKeyboardController.current
     
-    LaunchedEffect(Unit) {
-        focusRequester.requestFocus()
-        keyboardController?.show()
-    }
+    var selectedTab by remember { mutableStateOf("search") }
+    
+    // Убрали автоматический фокус при открытии экрана
+    // Фокус будет устанавливаться только при повторном нажатии на поиск
     
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    SearchBar(
-                        query = searchQuery,
-                        onQueryChange = { searchQuery = it },
-                        focusRequester = focusRequester
-                    )
-                },
-                actions = {
-                    IconButton(onClick = onToggleTheme) {
-                        Icon(
-                            painter = painterResource(
-                                id = if (isDarkTheme) R.drawable.ic_lighttheme else R.drawable.ic_nighttheme
-                            ),
-                            contentDescription = if (isDarkTheme) "Светлая тема" else "Тёмная тема"
-                        )
-                    }
-                }
-            )
+               topBar = {
+                   TopAppBar(
+                       title = {
+                           SearchBar(
+                               query = searchQuery,
+                               onQueryChange = { searchQuery = it },
+                               focusRequester = focusRequester
+                           )
+                       },
+                       actions = {
+                           // Показываем кнопку сортировки только если есть результаты поиска
+                           if (searchQuery.isNotBlank() && searchResults.isNotEmpty()) {
+                               Box {
+                                   IconButton(onClick = { showSortMenu = true }) {
+                                       Icon(Icons.Default.MoreVert, contentDescription = "Сортировка")
+                                   }
+                                   DropdownMenu(
+                                       expanded = showSortMenu,
+                                       onDismissRequest = { showSortMenu = false }
+                                   ) {
+                                       DropdownMenuItem(
+                                           text = { Text("По алфавиту") },
+                                           onClick = {
+                                               sortType = SortType.ALPHABETICAL
+                                               showSortMenu = false
+                                           }
+                                       )
+                                       DropdownMenuItem(
+                                           text = { Text("По оценке") },
+                                           onClick = {
+                                               sortType = SortType.RATING
+                                               showSortMenu = false
+                                           }
+                                       )
+                                       DropdownMenuItem(
+                                           text = { Text("По скачиваниям") },
+                                           onClick = {
+                                               sortType = SortType.DOWNLOADS
+                                               showSortMenu = false
+                                           }
+                                       )
+                                       DropdownMenuItem(
+                                           text = { Text("Сбросить") },
+                                           onClick = {
+                                               sortType = null
+                                               showSortMenu = false
+                                           }
+                                       )
+                                   }
+                               }
+                           }
+                       }
+                   )
+               },
+        bottomBar = {
+            Box(
+                modifier = Modifier.fillMaxWidth(),
+                contentAlignment = Alignment.BottomCenter
+            ) {
+                CustomBottomNavigationBar(
+                    selectedTab = selectedTab,
+                    onTabSelected = { tab ->
+                        when (tab) {
+                            "home" -> {
+                                selectedTab = tab
+                                navController.navigate("main") {
+                                    popUpTo("main") { inclusive = false }
+                                }
+                            }
+                            "search" -> {
+                                // Повторное нажатие на поиск - форсим курсор в поле ввода
+                                if (selectedTab == "search") {
+                                    focusRequester.requestFocus()
+                                    keyboardController?.show()
+                                    // Если есть запрос, очищаем его
+                                    if (searchQuery.isNotEmpty()) {
+                                        searchQuery = ""
+                                    }
+                                } else {
+                                    selectedTab = tab
+                                }
+                            }
+                            "profile" -> {
+                                selectedTab = tab
+                                navController.navigate("profile") {
+                                    popUpTo("main") { inclusive = false }
+                                }
+                            }
+                        }
+                    },
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .clip(RoundedCornerShape(50.dp))
+                )
+            }
         }
     ) { padding ->
         if (searchQuery.isBlank()) {
-            // Show categories when search is empty
+            // Show categories when search is empty (история поиска убрана)
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -90,7 +194,7 @@ fun SearchScreen(
                 
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(2),
-                    contentPadding = PaddingValues(horizontal = 16.dp),
+                    contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 80.dp),
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                     modifier = Modifier.weight(1f)
@@ -123,7 +227,7 @@ fun SearchScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(padding),
-                contentPadding = PaddingValues(16.dp),
+                contentPadding = PaddingValues(bottom = 80.dp, start = 16.dp, end = 16.dp, top = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 if (searchResults.isEmpty()) {
@@ -147,6 +251,7 @@ fun SearchScreen(
                             app = app,
                             onClick = {
                                 viewModel.onAppClicked(app)
+                                navController.navigate("details/${app.name}")
                             }
                         )
                     }

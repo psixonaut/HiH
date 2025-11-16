@@ -31,14 +31,7 @@ fun CategoriesScreen(
             TopAppBar(
                 title = { Text("Категории") },
                 actions = {
-                    IconButton(onClick = onToggleTheme) {
-                        Icon(
-                            painter = painterResource(
-                                id = if (isDarkTheme) R.drawable.ic_lighttheme else R.drawable.ic_nighttheme
-                            ),
-                            contentDescription = if (isDarkTheme) "Светлая тема" else "Тёмная тема"
-                        )
-                    }
+                    // Кнопка смены темы убрана
                 }
             )
         }

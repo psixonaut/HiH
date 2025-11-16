@@ -1,4 +1,942 @@
 package com.example.rustoreapplicationshowcases.ui.details
 
-class AppDetailsScreen {
+import android.app.Application
+import android.net.Uri
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.Star
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.Divider
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import com.example.rustoreapplicationshowcases.AppViewModelFactory
+import com.example.rustoreapplicationshowcases.R
+import com.example.rustoreapplicationshowcases.data.model.AppInfo
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.material.icons.filled.Close
+
+// Модель для одного скриншота
+data class ScreenshotItem(
+    val resId: Int
+)
+
+private val loremIpsum = """
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pretium tellus duis convallis tempus leo eu aenean. Iaculis massa nisl malesuada lacinia integer nunc posuere.
+        Conubia nostra inceptos himenaeos orci varius natoque penatibus. Nulla molestie mattis scelerisque maximus eget fermentum odio. Blandit quis suspendisse aliquet nisi sodales consequat magna. Ligula congue sollicitudin erat viverra ac tincidunt nam.
+""".trimIndent()
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AppDetailsScreen(
+    nav: NavController,
+    appName: String,
+    onToggleTheme: () -> Unit,
+    isDarkTheme: Boolean
+) {
+    val context = LocalContext.current.applicationContext as Application
+    val viewModel: DetailsViewModel = viewModel(
+        factory = AppViewModelFactory(app = context)
+    )
+
+    val decodedName = Uri.decode(appName)
+    val app = viewModel.getAppByName(decodedName)
+    val extra = viewModel.getExtraInfo(decodedName)
+    
+    // Загружаем отзывы из БД при первом открытии
+    LaunchedEffect(decodedName) {
+        viewModel.loadReviewsFromDb(decodedName)
+    }
+    
+    val reviewsFromDb by viewModel.reviewsFromDb.collectAsState()
+    val reviews = remember(reviewsFromDb, decodedName) {
+        val dbReviews = reviewsFromDb[decodedName] ?: emptyList()
+        val oldReviews = viewModel.getReviews(decodedName)
+        (oldReviews + dbReviews).distinctBy { it.text }
+    }
+    
+    var showAddReviewDialog by remember { mutableStateOf(false) }
+
+    // реальные скриншоты из drawable
+    val screenshots = remember {
+        listOf(
+            ScreenshotItem(R.drawable.sber_screen_1),
+            ScreenshotItem(R.drawable.sber_screen_2),
+            ScreenshotItem(R.drawable.sber_screen_3)
+        )
+    }
+
+    var openedScreenshotIndex by remember { mutableStateOf<Int?>(null) }
+
+    if (app == null) {
+        NotFoundAppScreen(nav = nav)
+        return
+    }
+
+    val iconResId = context.resources.getIdentifier(app.icon, "drawable", context.packageName)
+    val recommendedApps = viewModel.getSimilarApps(app)
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(text = app.name) },
+                navigationIcon = {
+                    IconButton(onClick = { nav.popBackStack() }) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = "Назад"
+                        )
+                    }
+                },
+                actions = {
+                    // Кнопка смены темы убрана
+                }
+            )
+        }
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .padding(padding)
+                .fillMaxSize()
+                .padding(horizontal = 16.dp)
+                .verticalScroll(rememberScrollState())
+        ) {
+
+            // ---------- Верхний блок: иконка + название + кнопка скачать ----------
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                if (iconResId != 0) {
+                    Image(
+                        painter = painterResource(id = iconResId),
+                        contentDescription = app.name,
+                        modifier = Modifier
+                            .size(96.dp)
+                            .clip(RoundedCornerShape(24.dp))
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(16.dp))
+
+                Column(
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text(
+                        text = app.name,
+                        style = MaterialTheme.typography.headlineSmall
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = if (app.publisher.isNotBlank()) {
+                            app.publisher
+                        } else {
+                            extra?.developer ?: "Издатель не указан"
+                        },
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    Button(
+                        onClick = { /* TODO: логика скачивания/перехода в магазин */ },
+                        shape = CircleShape,
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onPrimary
+                        )
+                    ) {
+                        Text(text = "Скачать")
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // ---------- Рейтинг + отзывы + загрузки + возраст ----------
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+
+                InfoChip(
+                    icon = "⭐",
+                    text = String.format("%.1f", app.rating) + " (${app.reviews} отзывов)"
+                )
+
+                Divider(
+                    modifier = Modifier
+                        .height(25.dp)
+                        .width(1.dp),
+                    color = MaterialTheme.colorScheme.outline
+                )
+
+                InfoChip(
+                    icon = "",
+                    text = "${app.downloads}+ загрузок"
+                )
+
+                Divider(
+                    modifier = Modifier
+                        .height(25.dp)
+                        .width(1.dp),
+                    color = MaterialTheme.colorScheme.outline
+                )
+
+                InfoChip(
+                    icon = "",
+                    text = app.ageRating
+                )
+            }
+
+
+            // ---------- Описание с возможностью разворота ----------
+            Text(
+                text = "Описание",
+                style = MaterialTheme.typography.titleMedium
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+
+            var descriptionExpanded by remember { mutableStateOf(false) }
+            val descriptionText = extra?.description ?: loremIpsum
+
+            Text(
+                text = if (descriptionExpanded) {
+                    descriptionText
+                } else {
+                    descriptionText.take(120) + if (descriptionText.length > 120) "…" else ""
+                },
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.clickable {
+                    if (descriptionText.length > 120) {
+                        descriptionExpanded = !descriptionExpanded
+                    }
+                }
+            )
+
+            if (descriptionText.length > 120) {
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = if (descriptionExpanded) "Свернуть" else "Развернуть",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.clickable {
+                        descriptionExpanded = !descriptionExpanded
+                    }
+                )
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // ---------- Скриншоты – карусель "полторы страницы" ----------
+            Text(
+                text = "Скриншоты",
+                style = MaterialTheme.typography.titleMedium
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+
+            ScreenshotCarousel(
+                screenshots = screenshots,
+                onOpenFull = { index -> openedScreenshotIndex = index }
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // ---------- Отзывы клиентов ----------
+            if (reviews.isNotEmpty()) {
+                var showAllReviews by remember { mutableStateOf(false) }
+                val displayedReviews = if (showAllReviews) reviews else reviews.take(5)
+                
+                Text(
+                    text = "Отзывы клиентов",
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+
+                displayedReviews.forEach { review ->
+                    ReviewCard(review = review)
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+                
+                // Кнопки "Показать больше" / "Свернуть"
+                if (reviews.size > 5) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    if (showAllReviews) {
+                        OutlinedButton(
+                            onClick = { showAllReviews = false },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text("Свернуть")
+                        }
+                    } else {
+                        OutlinedButton(
+                            onClick = { showAllReviews = true },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text("Показать больше (${reviews.size - 5})")
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+
+            // ---------- Кнопка "Оставьте свой комментарий" (более контрастная) ----------
+            Button(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                onClick = { showAddReviewDialog = true },
+                shape = CircleShape,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                )
+            ) {
+                Text(
+                    text = "Оставьте свой комментарий",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+            }
+            
+            // Диалог добавления отзыва
+            if (showAddReviewDialog) {
+                AddReviewDialog(
+                    appName = decodedName,
+                    onDismiss = { showAddReviewDialog = false },
+                    onReviewAdded = { review ->
+                        showAddReviewDialog = false
+                        // Добавляем отзыв в БД
+                        viewModel.addReview(decodedName, review.text, review.rating, review.userName)
+                        // Отзыв будет автоматически обновлен через StateFlow
+                    }
+                )
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // ---------- Блок 1: предложения от разработчика ----------
+            Text(
+                text = extra?.developer?.let { "Ещё от $it" } ?: "Другие приложения разработчика",
+                style = MaterialTheme.typography.titleMedium
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+
+            MoreFromDeveloperBlock(
+                app = app,
+                developerName = extra?.developer,
+                nav = nav,
+                apps = recommendedApps
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // ---------- Блок 2: похожие приложения (то, что уже было) ----------
+            Text(
+                text = "Похожие приложения",
+                style = MaterialTheme.typography.titleMedium
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+
+            if (recommendedApps.isNotEmpty()) {
+                LazyRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    items(recommendedApps) { recommended ->
+                        RecommendedAppRow(nav = nav, app = recommended)
+                    }
+                }
+            } else {
+                // Заглушки, если рекомендаций нет
+                LazyRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    items(5) { index ->
+                        RecommendedPlaceholderCard(slotNumber = index + 1)
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(32.dp))
+        }
+    }
+
+    // ---------- Полноэкранный просмотр скриншота ----------
+    openedScreenshotIndex?.let { index ->
+        FullscreenScreenshotViewer(
+            screenshots = screenshots,
+            startIndex = index,
+            onClose = { openedScreenshotIndex = null }
+        )
+    }
+}
+
+@Composable
+fun Divider(modifier: Modifier, color: Color) {
+    TODO("Not yet implemented")
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun FullscreenScreenshotViewer(
+    screenshots: List<ScreenshotItem>,
+    startIndex: Int,
+    onClose: () -> Unit
+) {
+    val pagerState = rememberPagerState(
+        initialPage = startIndex,
+        pageCount = { screenshots.size }
+    )
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black.copy(alpha = 0.95f))
+    ) {
+
+        HorizontalPager(
+            state = pagerState,
+            modifier = Modifier.fillMaxSize()
+        ) { page ->
+            val item = screenshots[page]
+
+            Image(
+                painter = painterResource(item.resId),
+                contentDescription = null,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(24.dp)
+                    .clip(RoundedCornerShape(16.dp)),
+                contentScale = ContentScale.Fit
+            )
+        }
+
+        IconButton(
+            onClick = onClose,
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(16.dp)
+        ) {
+            Icon(
+                Icons.Default.Close,
+                contentDescription = "Закрыть",
+                tint = Color.White,
+                modifier = Modifier.size(32.dp)
+            )
+        }
+
+        // Новый индикатор
+        Row(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            repeat(pagerState.pageCount) { index ->
+                Box(
+                    modifier = Modifier
+                        .size(if (pagerState.currentPage == index) 10.dp else 6.dp)
+                        .clip(CircleShape)
+                        .background(
+                            if (pagerState.currentPage == index) Color.White
+                            else Color.Gray
+                        )
+                )
+            }
+        }
+    }
+}
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun NotFoundAppScreen(nav: NavController) {
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Приложение не найдено") },
+                navigationIcon = {
+                    IconButton(onClick = { nav.popBackStack() }) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = "Назад"
+                        )
+                    }
+                }
+            )
+        }
+    ) { padding ->
+        Box(
+            modifier = Modifier
+                .padding(padding)
+                .fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            Text("Не удалось найти данные о приложении")
+        }
+    }
+}
+
+// ---------- Скриншоты: горизонтальная карусель ----------
+
+@Composable
+private fun ScreenshotCarousel(
+    screenshots: List<ScreenshotItem>,
+    onOpenFull: (Int) -> Unit
+) {
+    LazyRow(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        itemsIndexed(screenshots) { index, item ->
+            Card(
+                modifier = Modifier
+                    // каждый элемент ~75% ширины – видно полторы "страницы"
+                    .fillParentMaxWidth(0.75f)
+                    .aspectRatio(9f / 16f)
+                    .clickable { onOpenFull(index) },
+                shape = RoundedCornerShape(24.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant
+                )
+            ) {
+                Image(
+                    painter = painterResource(id = item.resId),
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+        }
+    }
+}
+
+// ---------- Остальные вспомогательные блоки ----------
+
+@Composable
+private fun RatingBadge(rating: Float) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .clip(RoundedCornerShape(16.dp))
+            .background(MaterialTheme.colorScheme.primaryContainer)
+            .padding(horizontal = 8.dp, vertical = 4.dp)
+    ) {
+        Icon(
+            imageVector = Icons.Filled.Star,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary
+        )
+        Spacer(modifier = Modifier.width(4.dp))
+        Text(
+            text = String.format("%.1f", rating),
+            style = MaterialTheme.typography.bodyMedium
+        )
+    }
+}
+
+@Composable
+private fun ReviewCard(review: AppReview) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(12.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = review.userName,
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                RatingStars(rating = review.rating)
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = review.date,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            Text(
+                text = review.text,
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+    }
+}
+
+@Composable
+private fun RatingStars(rating: Float, maxStars: Int = 5) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(2.dp)
+    ) {
+        val clampedRating = rating.coerceIn(0f, maxStars.toFloat())
+        val fullStars = clampedRating.toInt()
+        val hasHalf = (clampedRating - fullStars) >= 0.5f && fullStars < maxStars
+
+        for (i in 1..maxStars) {
+            val icon = when {
+                i <= fullStars -> Icons.Filled.Star
+                hasHalf && i == fullStars + 1 -> Icons.Filled.Star // можно заменить на ползвезды при наличии ресурса
+                else -> Icons.Outlined.Star
+            }
+
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = if (i <= fullStars || (hasHalf && i == fullStars + 1)) {
+                    MaterialTheme.colorScheme.primary
+                } else {
+                    MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
+                },
+                modifier = Modifier.size(16.dp)
+            )
+        }
+    }
+}
+
+// Карточка "похожие приложения" для LazyRow
+@Composable
+private fun RecommendedAppRow(
+    nav: NavController,
+    app: AppInfo
+) {
+    val context = LocalContext.current
+    val iconResId = context.resources.getIdentifier(app.icon, "drawable", context.packageName)
+
+    Card(
+        modifier = Modifier
+            .width(200.dp)
+            .clickable {
+                val encodedName = Uri.encode(app.name)
+                nav.navigate("details/$encodedName")
+            },
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(12.dp),
+            horizontalAlignment = Alignment.Start
+        ) {
+            if (iconResId != 0) {
+                Image(
+                    painter = painterResource(id = iconResId),
+                    contentDescription = app.name,
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = app.name,
+                style = MaterialTheme.typography.bodyMedium,
+                maxLines = 2
+            )
+            Text(
+                text = "Категория: ${app.category}",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = Icons.Filled.Star,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary
+                )
+                Spacer(modifier = Modifier.width(2.dp))
+                Text(
+                    text = String.format("%.1f", app.rating),
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+        }
+    }
+}
+
+// Блок "Ещё от разработчика" – как на первом скрине
+@Composable
+private fun MoreFromDeveloperBlock(
+    app: AppInfo,
+    developerName: String?,
+    nav: NavController,
+    apps: List<AppInfo>
+) {
+    val context = LocalContext.current
+    val iconResId = context.resources.getIdentifier(app.icon, "drawable", context.packageName)
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(180.dp),
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        )
+    ) {
+        Box(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            Column(
+                modifier = Modifier.align(Alignment.Center),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                if (iconResId != 0) {
+                    Image(
+                        painter = painterResource(id = iconResId),
+                        contentDescription = app.name,
+                        modifier = Modifier
+                            .size(72.dp)
+                            .clip(CircleShape)
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    text = developerName?.let { "More by $it" } ?: "More from this developer",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                OutlinedButton(
+                    onClick = {
+                        // простая логика: открыть первое приложение из списка, если оно есть
+                        apps.firstOrNull()?.let { target ->
+                            val encodedName = Uri.encode(target.name)
+                            nav.navigate("details/$encodedName")
+                        }
+                    },
+                    shape = CircleShape
+                ) {
+                    Text(text = "More")
+                }
+            }
+        }
+    }
+}
+
+// Заглушка-карточка, когда рекомендаций нет
+@Composable
+private fun RecommendedPlaceholderCard(
+    slotNumber: Int
+) {
+    Card(
+        modifier = Modifier
+            .width(200.dp),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(12.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.1f))
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = "Рекомендуемое приложение $slotNumber",
+                style = MaterialTheme.typography.bodyMedium
+            )
+            Text(
+                text = "Заглушка рекомендации",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+@Composable
+fun InfoChip(
+    icon: String,
+    text: String
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        Text(
+            text = icon,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.primary
+        )
+
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
+
+@Composable
+fun AddReviewDialog(
+    appName: String,
+    onDismiss: () -> Unit,
+    onReviewAdded: (AppReview) -> Unit
+) {
+    var reviewText by remember { mutableStateOf("") }
+    var rating by remember { mutableStateOf(5f) }
+    var userName by remember { mutableStateOf("") }
+    
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Оставить отзыв") },
+        text = {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Text(
+                    text = "Приложение: $appName",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                
+                OutlinedTextField(
+                    value = userName,
+                    onValueChange = { userName = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    label = { Text("Ваше имя (необязательно)") },
+                    placeholder = { Text("Пользователь") }
+                )
+                
+                // Выбор рейтинга
+                Text(
+                    text = "Оценка:",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    (1..5).forEach { star ->
+                        IconButton(
+                            onClick = { rating = star.toFloat() }
+                        ) {
+                            Icon(
+                                imageVector = if (star <= rating) Icons.Filled.Star else Icons.Outlined.Star,
+                                contentDescription = "$star звезд",
+                                tint = if (star <= rating) {
+                                    MaterialTheme.colorScheme.primary
+                                } else {
+                                    MaterialTheme.colorScheme.onSurfaceVariant
+                                }
+                            )
+                        }
+                    }
+                }
+                
+                OutlinedTextField(
+                    value = reviewText,
+                    onValueChange = { reviewText = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    label = { Text("Ваш отзыв *") },
+                    placeholder = { Text("Напишите ваше мнение о приложении...") },
+                    minLines = 4,
+                    maxLines = 8
+                )
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    if (reviewText.isNotBlank()) {
+                        onReviewAdded(
+                            AppReview(
+                                userName = userName.ifBlank { "Пользователь" },
+                                rating = rating,
+                                date = java.text.SimpleDateFormat("dd.MM.yyyy", java.util.Locale("ru")).format(java.util.Date()),
+                                text = reviewText
+                            )
+                        )
+                    }
+                },
+                enabled = reviewText.isNotBlank()
+            ) {
+                Text("Отправить")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Отмена")
+            }
+        }
+    )
 }

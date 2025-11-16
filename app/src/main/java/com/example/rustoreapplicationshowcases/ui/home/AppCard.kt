@@ -20,6 +20,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.example.rustoreapplicationshowcases.data.model.AppInfo
+import com.example.rustoreapplicationshowcases.R
+
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
@@ -32,42 +34,62 @@ fun AppCard(
     modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
+    val context = LocalContext.current
+    
+    val iconResId = context.resources.getIdentifier(
+        app.icon,
+        "drawable",
+        context.packageName
+    ).let { if (it == 0) R.drawable.ic_app_placeholder else it }
+
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .padding(8.dp)
             .clickable { onClick() },
-        elevation = CardDefaults.cardElevation(4.dp)
+        elevation = CardDefaults.cardElevation(2.dp),
+        shape = RoundedCornerShape(12.dp)
     ) {
-
-        val context = LocalContext.current
-
-        val iconResId = context.resources.getIdentifier(app.icon, "drawable", context.packageName)
-
-        Card(
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(8.dp),
-            elevation = CardDefaults.cardElevation(4.dp) // Тестовая тень, может удалим
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(modifier = Modifier.padding(16.dp)) {
+            Image(
+                painter = painterResource(id = iconResId),
+                contentDescription = app.name,
+                modifier = Modifier.size(56.dp)
+            )
 
-                val iconResId =
-                    context.resources.getIdentifier(app.icon, "drawable", context.packageName)
+            Spacer(modifier = Modifier.width(16.dp))
 
-                Image(
-                    painter = painterResource(id = iconResId),
-                    contentDescription = app.name,
-                    modifier = Modifier.size(56.dp)
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = app.name,
+                    style = MaterialTheme.typography.titleMedium
                 )
-
-                Spacer(modifier = Modifier.width(16.dp))
-
-                Column {
-                    Text(app.name, style = MaterialTheme.typography.titleMedium)
-                    Text("Оценка: ${app.rating}", style = MaterialTheme.typography.bodyMedium)
-                    Text(app.category, style = MaterialTheme.typography.labelMedium)
-                }
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = if (app.publisher.isNotBlank()) {
+                        app.publisher
+                    } else {
+                        "Издатель не указан"
+                    },
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "Оценка: ${app.rating}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = app.category,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         }
     }
@@ -114,9 +136,9 @@ fun AppCardHorizontal(
                         .background(Color.Gray.copy(alpha = 0.3f))
                 )
             }
-            
+
             Spacer(modifier = Modifier.height(8.dp))
-            
+
             Text(
                 text = app.name,
                 style = MaterialTheme.typography.bodySmall,
