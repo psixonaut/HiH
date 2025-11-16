@@ -8,6 +8,13 @@ import com.example.rustoreapplicationshowcases.ui.onboarding.OnboardingScreen
 import com.example.rustoreapplicationshowcases.ui.home.HomeScreen
 import com.example.rustoreapplicationshowcases.ui.categories.CategoriesScreen
 import com.example.rustoreapplicationshowcases.ui.details.AppDetailsScreen
+import com.example.rustoreapplicationshowcases.ui.home.CategorySelectionScreen
+import com.example.rustoreapplicationshowcases.ui.home.CategorySelectionViewModel
+import com.example.rustoreapplicationshowcases.ui.search.SearchScreen
+import com.example.rustoreapplicationshowcases.ui.search.AllCategoriesScreen
+import com.example.rustoreapplicationshowcases.ui.search.CategoryAppsScreen
+import androidx.compose.runtime.livedata.observeAsState
+
 @Composable
 fun AppNavHost(
     navController: NavHostController,
@@ -49,8 +56,21 @@ fun AppNavHost(
         }
 
         composable("main") {
+            val selectedCategories = navController.currentBackStackEntry
+                ?.savedStateHandle
+                ?.getLiveData<String>("selectedCategories")?.observeAsState()
+
             HomeScreen(
                 nav = navController,
+                onToggleTheme = onToggleTheme,
+                isDarkTheme = isDarkTheme,
+                selectedCategories = selectedCategories?.value
+            )
+        }
+
+        composable("categorySelection") {
+            CategorySelectionScreen(
+                navController = navController,
                 onToggleTheme = onToggleTheme,
                 isDarkTheme = isDarkTheme
             )
@@ -71,6 +91,32 @@ fun AppNavHost(
             AppDetailsScreen(
                 nav = navController,
                 appName = appName,
+                onToggleTheme = onToggleTheme,
+                isDarkTheme = isDarkTheme
+            )
+        }
+
+        composable("search") {
+            SearchScreen(
+                navController = navController,
+                onToggleTheme = onToggleTheme,
+                isDarkTheme = isDarkTheme
+            )
+        }
+
+        composable("allCategories") {
+            AllCategoriesScreen(
+                navController = navController,
+                onToggleTheme = onToggleTheme,
+                isDarkTheme = isDarkTheme
+            )
+        }
+
+        composable("categoryApps/{categoryName}") { backStackEntry ->
+            val category = backStackEntry.arguments?.getString("categoryName") ?: ""
+            CategoryAppsScreen(
+                navController = navController,
+                categoryName = category,
                 onToggleTheme = onToggleTheme,
                 isDarkTheme = isDarkTheme
             )

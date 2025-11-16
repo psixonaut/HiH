@@ -54,4 +54,30 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
             .sortedByDescending { it.downloads }
             .take(limit)
     }
+
+    fun getAllCategories(): List<String> {
+        return repo.getAllCategories()
+    }
+    
+    fun getCategoriesWithAppCount(): List<Pair<String, Int>> {
+        return repo.getAllCategories().map { category ->
+            category to apps.count { it.category == category }
+        }.sortedByDescending { it.second }
+    }
+    
+    fun getTopCategoriesByAppCount(limit: Int = 8): List<Pair<String, Int>> {
+        return getCategoriesWithAppCount().take(limit)
+    }
+    
+    fun getAppsByCategory(category: String): List<AppInfo> {
+        return apps.filter { it.category == category }
+    }
+    
+    fun searchApps(query: String): List<AppInfo> {
+        if (query.isBlank()) return emptyList()
+        return apps.filter { 
+            it.name.contains(query, ignoreCase = true) ||
+            it.category.contains(query, ignoreCase = true)
+        }
+    }
 }

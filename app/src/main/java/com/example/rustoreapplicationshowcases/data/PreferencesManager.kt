@@ -21,4 +21,12 @@ class PreferencesManager(context: Context) {
     fun setThemePreference(theme: String) {
         prefs.edit().putString("theme_preference", theme).apply()
     }
+
+    fun getSelectedCategories(): String? {
+        return prefs.getString("selected_categories", null)
+    }
+
+    fun setSelectedCategories(categories: String) {
+        prefs.edit().putString("selected_categories", categories).apply()
+    }
 }
