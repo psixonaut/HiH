@@ -7,6 +7,7 @@ import androidx.navigation.compose.composable
 import com.example.rustoreapplicationshowcases.ui.onboarding.OnboardingScreen
 import com.example.rustoreapplicationshowcases.ui.home.HomeScreen
 import com.example.rustoreapplicationshowcases.ui.categories.CategoriesScreen
+import com.example.rustoreapplicationshowcases.ui.details.AppDetailsScreen
 import com.example.rustoreapplicationshowcases.ui.home.CategorySelectionScreen
 import com.example.rustoreapplicationshowcases.ui.home.CategorySelectionViewModel
 import com.example.rustoreapplicationshowcases.ui.search.SearchScreen
@@ -84,7 +85,17 @@ fun AppNavHost(
                 isDarkTheme = isDarkTheme
             )
         }
-        
+        composable("details/{appName}") { backStackEntry ->
+            val appName = backStackEntry.arguments?.getString("appName") ?: ""
+
+            AppDetailsScreen(
+                nav = navController,
+                appName = appName,
+                onToggleTheme = onToggleTheme,
+                isDarkTheme = isDarkTheme
+            )
+        }
+
         composable("search") {
             SearchScreen(
                 navController = navController,
@@ -92,7 +103,7 @@ fun AppNavHost(
                 isDarkTheme = isDarkTheme
             )
         }
-        
+
         composable("allCategories") {
             AllCategoriesScreen(
                 navController = navController,
@@ -100,7 +111,7 @@ fun AppNavHost(
                 isDarkTheme = isDarkTheme
             )
         }
-        
+
         composable("categoryApps/{categoryName}") { backStackEntry ->
             val category = backStackEntry.arguments?.getString("categoryName") ?: ""
             CategoryAppsScreen(

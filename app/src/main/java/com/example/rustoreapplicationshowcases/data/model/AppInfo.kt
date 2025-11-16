@@ -2,9 +2,11 @@ package com.example.rustoreapplicationshowcases.data.model
 
 data class AppInfo(
     val id: String,
-    val icon: String,
     val name: String,
     val rating: Double,
     val category: String,
-    var downloads: Int = 0
+    val icon: String,
+    var downloads: Int = 0,
+    var reviews: Int = 0,
+    var ageRating: String = "0+"
 )

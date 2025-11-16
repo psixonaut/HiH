@@ -20,6 +20,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.example.rustoreapplicationshowcases.data.model.AppInfo
+import com.example.rustoreapplicationshowcases.R
+
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
@@ -42,8 +44,6 @@ fun AppCard(
 
         val context = LocalContext.current
 
-        val iconResId = context.resources.getIdentifier(app.icon, "drawable", context.packageName)
-
         Card(
             modifier = Modifier
                 .fillMaxWidth()
@@ -52,8 +52,11 @@ fun AppCard(
         ) {
             Row(modifier = Modifier.padding(16.dp)) {
 
-                val iconResId =
-                    context.resources.getIdentifier(app.icon, "drawable", context.packageName)
+                val iconResId = context.resources.getIdentifier(
+                    app.icon,
+                    "drawable",
+                    context.packageName
+                ).let { if (it == 0) R.drawable.ic_app_placeholder else it }
 
                 Image(
                     painter = painterResource(id = iconResId),
@@ -114,9 +117,9 @@ fun AppCardHorizontal(
                         .background(Color.Gray.copy(alpha = 0.3f))
                 )
             }
-            
+
             Spacer(modifier = Modifier.height(8.dp))
-            
+
             Text(
                 text = app.name,
                 style = MaterialTheme.typography.bodySmall,

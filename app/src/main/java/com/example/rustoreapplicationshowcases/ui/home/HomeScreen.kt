@@ -23,6 +23,11 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.rustoreapplicationshowcases.AppViewModelFactory
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.foundation.lazy.itemsIndexed
+import android.net.Uri
+import androidx.compose.runtime.collectAsState
 import com.example.rustoreapplicationshowcases.R
 import com.example.rustoreapplicationshowcases.data.model.AppInfo
 import com.example.rustoreapplicationshowcases.data.PreferencesManager
@@ -42,9 +47,9 @@ fun HomeScreen(
     val viewModel: HomeViewModel = viewModel(
         factory = AppViewModelFactory(context)
     )
-    
+
     val preferencesManager = PreferencesManager(context)
-    
+
     // Load saved categories if selectedCategories is null (first launch)
     val savedCategories = preferencesManager.getSelectedCategories()
     val categoriesToUse = selectedCategories ?: savedCategories
@@ -56,7 +61,7 @@ fun HomeScreen(
     val dynamicCategories = remember(categoriesToUse) {
         (categoriesToUse?.split(",")?.filter { it.isNotBlank() } ?: emptyList()).sorted()
     }
-    
+
     val dynamicCategoryApps = remember(dynamicCategories) {
         dynamicCategories.mapNotNull { category ->
             viewModel.getFilteredApps(category).take(6).takeIf { it.isNotEmpty() }
@@ -101,9 +106,10 @@ fun HomeScreen(
                     IconButton(onClick = onToggleTheme) {
                         Icon(
                             painter = painterResource(
-                                id = if (isDarkTheme) R.drawable.ic_lighttheme else R.drawable.ic_nighttheme
+                                id = if (isDarkTheme) R.drawable.ic_lighttheme
+                                else R.drawable.ic_nighttheme
                             ),
-                            contentDescription = if (isDarkTheme) "Светлая тема" else "Тёмная тема"
+                            contentDescription = null
                         )
                     }
                 }
@@ -244,7 +250,7 @@ fun SectionWithTitle(
                 .padding(horizontal = 16.dp)
                 .padding(bottom = 12.dp)
         )
-        
+
         LazyRow(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             contentPadding = PaddingValues(start = 16.dp, end = 16.dp), // Adjusted padding
