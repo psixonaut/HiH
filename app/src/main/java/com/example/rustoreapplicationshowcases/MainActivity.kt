@@ -20,8 +20,7 @@ class MainActivity : ComponentActivity() {
         PreloadedDatabase.copyDatabaseIfNeeded(this)
 
         val prefs = PreferencesManager(this)
-        val showOnboarding = true
-        // val showOnboarding = !prefs.isOnboardingShown()
+        val showOnboarding = !prefs.isOnboardingShown()
 
         enableEdgeToEdge()
 
