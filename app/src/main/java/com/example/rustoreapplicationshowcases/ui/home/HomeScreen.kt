@@ -21,6 +21,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.foundation.lazy.itemsIndexed
 import android.net.Uri
+import androidx.compose.runtime.collectAsState
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
@@ -34,22 +35,22 @@ fun HomeScreen(
         factory = AppViewModelFactory(context)
     )
 
+    val apps = viewModel.apps
+    val filtered = viewModel.getFilteredApps(categoryFilter)
     val searchQuery = viewModel.searchQuery
-    val apps = viewModel.getFilteredApps(categoryFilter)
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = {
-                    Text(categoryFilter ?: "Главная")
-                },
+                title = { Text(categoryFilter ?: "Главная") },
                 actions = {
                     IconButton(onClick = onToggleTheme) {
                         Icon(
                             painter = painterResource(
-                                id = if (isDarkTheme) R.drawable.ic_lighttheme else R.drawable.ic_nighttheme
+                                id = if (isDarkTheme) R.drawable.ic_lighttheme
+                                else R.drawable.ic_nighttheme
                             ),
-                            contentDescription = if (isDarkTheme) "Светлая тема" else "Тёмная тема"
+                            contentDescription = null
                         )
                     }
                     IconButton(onClick = { nav.navigate("categories") }) {
@@ -70,44 +71,36 @@ fun HomeScreen(
                     .padding(8.dp),
                 placeholder = { Text("Поиск приложений") },
                 singleLine = true,
-                shape = RoundedCornerShape(16.dp) // Тестовое скругление
+                shape = RoundedCornerShape(16.dp)
             )
 
             val listState = rememberLazyListState()
 
             LazyColumn(state = listState) {
 
-                itemsIndexed(apps) { index, app ->
+                itemsIndexed(filtered) { index, app ->
 
-                    val itemOffset = when {
-                        listState.firstVisibleItemIndex == index ->
+                    val itemOffset =
+                        if (listState.firstVisibleItemIndex == index)
                             listState.firstVisibleItemScrollOffset
+                        else 0
 
-                        listState.firstVisibleItemIndex < index -> 0
-                        else -> 300 // удалённые элементы
-                    }
-
-                    // порог начала затухания (высота строки поиска)
-                    val fadeStart = 0f
-                    val fadeEnd = 350f // чем больше, тем мягче затухание
-
-                    val alpha = ((fadeEnd - itemOffset) / fadeEnd).coerceIn(0f, 1f)
+                    val fadeEnd = 350f
+                    val alpha = ((fadeEnd - itemOffset) / fadeEnd)
+                        .coerceIn(0f, 1f)
 
                     AppCard(
                         app = app,
                         modifier = Modifier.graphicsLayer {
                             this.alpha = alpha
 
-                            // минимальный размер при исчезновении
                             val minScale = 0.85f
-                            val scale = minScale + (alpha * (1f - minScale))
-
-                            this.scaleX = scale
-                            this.scaleY = scale
+                            val scale = minScale + alpha * (1f - minScale)
+                            scaleX = scale
+                            scaleY = scale
                         },
                         onClick = {
                             viewModel.onAppClicked(app)
-
                             val encodedName = Uri.encode(app.name)
                             nav.navigate("details/$encodedName")
                         }

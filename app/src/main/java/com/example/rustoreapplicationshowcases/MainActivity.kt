@@ -10,11 +10,14 @@ import androidx.navigation.compose.rememberNavController
 import com.example.rustoreapplicationshowcases.data.PreferencesManager
 import com.example.rustoreapplicationshowcases.navigation.AppNavHost
 import com.example.rustoreapplicationshowcases.ui.theme.RuStoreApplicationShowcasesTheme
+import com.example.rustoreapplicationshowcases.data.local.PreloadedDatabase
 
 class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        PreloadedDatabase.copyDatabaseIfNeeded(this)
 
         val prefs = PreferencesManager(this)
         val showOnboarding = true

@@ -22,7 +22,6 @@ class DetailsViewModel(application: Application) : AndroidViewModel(application)
 
     private val repo = AppRepository(application)
 
-    // Доп.данные только для Сбербанка (пока достаточно для твоей части ТЗ)
     private val extraInfo: Map<String, AppExtraInfo> = mapOf(
         "Сбербанк" to AppExtraInfo(
             developer = "Сбербанк",
@@ -33,29 +32,17 @@ class DetailsViewModel(application: Application) : AndroidViewModel(application)
 
     private val reviews: Map<String, List<AppReview>> = mapOf(
         "Сбербанк" to listOf(
-            AppReview(
-                userName = "Анна",
-                rating = 5f,
-                date = "12.11.2025",
-                text = "Очень удобно оплачивать коммуналку и переводить деньги по номеру телефона. Интерфейс понятный."
-            ),
-            AppReview(
-                userName = "Игорь",
-                rating = 4f,
-                date = "10.11.2025",
-                text = "Все основные функции под рукой, иногда только долго загружается история операций."
-            ),
-            AppReview(
-                userName = "Мария",
-                rating = 5f,
-                date = "05.11.2025",
-                text = "Нравится дизайн и пуши по операциям. Чувствую контроль над финансами."
-            )
+            AppReview("Анна", 5f, "12.11.2025",
+                "Очень удобно оплачивать коммуналку и переводить деньги по номеру телефона. Интерфейс понятный."),
+            AppReview("Игорь", 4f, "10.11.2025",
+                "Все основные функции под рукой, иногда только долго загружается история операций."),
+            AppReview("Мария", 5f, "05.11.2025",
+                "Нравится дизайн и пуши по операциям. Чувствую контроль над финансами.")
         )
     )
 
     fun getAppByName(name: String): AppInfo? =
-        repo.apps.find { it.name == name }
+        repo.getAllApps().find { it.name == name }
 
     fun getExtraInfo(name: String): AppExtraInfo? =
         extraInfo[name]
@@ -64,7 +51,7 @@ class DetailsViewModel(application: Application) : AndroidViewModel(application)
         reviews[name].orEmpty()
 
     fun getSimilarApps(current: AppInfo, limit: Int = 5): List<AppInfo> =
-        repo.apps
+        repo.getAllApps()
             .filter { it.category == current.category && it.name != current.name }
             .take(limit)
 }

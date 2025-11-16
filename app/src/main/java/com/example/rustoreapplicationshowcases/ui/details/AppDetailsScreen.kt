@@ -2,6 +2,7 @@ package com.example.rustoreapplicationshowcases.ui.details
 
 import android.app.Application
 import android.net.Uri
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -9,6 +10,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -31,6 +34,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.Divider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -47,12 +51,19 @@ import androidx.navigation.NavController
 import com.example.rustoreapplicationshowcases.AppViewModelFactory
 import com.example.rustoreapplicationshowcases.R
 import com.example.rustoreapplicationshowcases.data.model.AppInfo
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.material.icons.filled.Close
 
 // Модель для одного скриншота
 data class ScreenshotItem(
-    val resId: Int,
-    val title: String
+    val resId: Int
 )
+
+private val loremIpsum = """
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pretium tellus duis convallis tempus leo eu aenean. Iaculis massa nisl malesuada lacinia integer nunc posuere.
+        Conubia nostra inceptos himenaeos orci varius natoque penatibus. Nulla molestie mattis scelerisque maximus eget fermentum odio. Blandit quis suspendisse aliquet nisi sodales consequat magna. Ligula congue sollicitudin erat viverra ac tincidunt nam.
+""".trimIndent()
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -75,9 +86,9 @@ fun AppDetailsScreen(
     // реальные скриншоты из drawable
     val screenshots = remember {
         listOf(
-            ScreenshotItem(R.drawable.sber_screen_1, "Главный экран"),
-            ScreenshotItem(R.drawable.sber_screen_2, "Платежи и переводы"),
-            ScreenshotItem(R.drawable.sber_screen_3, "История операций")
+            ScreenshotItem(R.drawable.sber_screen_1),
+            ScreenshotItem(R.drawable.sber_screen_2),
+            ScreenshotItem(R.drawable.sber_screen_3)
         )
     }
 
@@ -175,26 +186,45 @@ fun AppDetailsScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // ---------- Рейтинг ----------
-            Text(
-                text = buildString {
-                    append("Рейтинг: ${String.format("%.1f", app.rating)}")
-                    if (reviews.isNotEmpty()) {
-                        append(" (${reviews.size} отзывов)")
-                    }
-                },
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            // ---------- Рейтинг + отзывы + загрузки + возраст ----------
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
 
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = "[Интерактивно: можно улучшить, добавив оценку по нажатию]",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+                InfoChip(
+                    icon = "⭐",
+                    text = String.format("%.1f", app.rating) + " (${app.reviews} отзывов)"
+                )
 
-            Spacer(modifier = Modifier.height(16.dp))
+                Divider(
+                    modifier = Modifier
+                        .height(25.dp)
+                        .width(1.dp),
+                    color = MaterialTheme.colorScheme.outline
+                )
+
+                InfoChip(
+                    icon = "",
+                    text = "${app.downloads}+ загрузок"
+                )
+
+                Divider(
+                    modifier = Modifier
+                        .height(25.dp)
+                        .width(1.dp),
+                    color = MaterialTheme.colorScheme.outline
+                )
+
+                InfoChip(
+                    icon = "",
+                    text = app.ageRating
+                )
+            }
+
 
             // ---------- Описание с возможностью разворота ----------
             Text(
@@ -204,7 +234,7 @@ fun AppDetailsScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
             var descriptionExpanded by remember { mutableStateOf(false) }
-            val descriptionText = extra?.description ?: "Описание пока не добавлено."
+            val descriptionText = extra?.description ?: loremIpsum
 
             Text(
                 text = if (descriptionExpanded) {
@@ -333,28 +363,90 @@ fun AppDetailsScreen(
 
     // ---------- Полноэкранный просмотр скриншота ----------
     openedScreenshotIndex?.let { index ->
-        val item = screenshots[index]
-
-        AlertDialog(
-            onDismissRequest = { openedScreenshotIndex = null },
-            confirmButton = {
-                TextButton(onClick = { openedScreenshotIndex = null }) {
-                    Text("Закрыть")
-                }
-            },
-            title = { Text(item.title) },
-            text = {
-                Image(
-                    painter = painterResource(id = item.resId),
-                    contentDescription = item.title,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(24.dp))
-                )
-            }
+        FullscreenScreenshotViewer(
+            screenshots = screenshots,
+            startIndex = index,
+            onClose = { openedScreenshotIndex = null }
         )
     }
 }
+
+@Composable
+fun Divider(modifier: Modifier, color: Color) {
+    TODO("Not yet implemented")
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun FullscreenScreenshotViewer(
+    screenshots: List<ScreenshotItem>,
+    startIndex: Int,
+    onClose: () -> Unit
+) {
+    val pagerState = rememberPagerState(
+        initialPage = startIndex,
+        pageCount = { screenshots.size }
+    )
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black.copy(alpha = 0.95f))
+    ) {
+
+        HorizontalPager(
+            state = pagerState,
+            modifier = Modifier.fillMaxSize()
+        ) { page ->
+            val item = screenshots[page]
+
+            Image(
+                painter = painterResource(item.resId),
+                contentDescription = null,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(24.dp)
+                    .clip(RoundedCornerShape(16.dp)),
+                contentScale = ContentScale.Fit
+            )
+        }
+
+        IconButton(
+            onClick = onClose,
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(16.dp)
+        ) {
+            Icon(
+                Icons.Default.Close,
+                contentDescription = "Закрыть",
+                tint = Color.White,
+                modifier = Modifier.size(32.dp)
+            )
+        }
+
+        // Новый индикатор
+        Row(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            repeat(pagerState.pageCount) { index ->
+                Box(
+                    modifier = Modifier
+                        .size(if (pagerState.currentPage == index) 10.dp else 6.dp)
+                        .clip(CircleShape)
+                        .background(
+                            if (pagerState.currentPage == index) Color.White
+                            else Color.Gray
+                        )
+                )
+            }
+        }
+    }
+}
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -410,7 +502,7 @@ private fun ScreenshotCarousel(
             ) {
                 Image(
                     painter = painterResource(id = item.resId),
-                    contentDescription = item.title,
+                    contentDescription = null,
                     modifier = Modifier.fillMaxSize()
                 )
             }
@@ -667,5 +759,28 @@ private fun RecommendedPlaceholderCard(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
+    }
+}
+
+@Composable
+fun InfoChip(
+    icon: String,
+    text: String
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        Text(
+            text = icon,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.primary
+        )
+
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }
