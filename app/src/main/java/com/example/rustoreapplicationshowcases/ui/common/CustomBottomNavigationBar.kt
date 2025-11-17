@@ -35,52 +35,17 @@ fun CustomBottomNavigationBar(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 64.dp, vertical = 25.dp)
+            .padding(horizontal = 44.dp, vertical = 25.dp) // horizontal 64 лучше
             .height(80.dp)
             .clickable(enabled = false, onClick = {}) // блокировка сквозных кликов
     ) {
 
-        // ---- iOS Стеклянный фон (фейковый блюр) ----
-        Box(
-            modifier = Modifier
-                .matchParentSize()
-                .clip(RoundedCornerShape(45.dp))
-                .then(
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                        Modifier.graphicsLayer {
-                            renderEffect = RenderEffect.createBlurEffect(
-                                36f, 36f, Shader.TileMode.CLAMP
-                            ).asComposeRenderEffect()
-                        }
-                    } else Modifier
-                )
-        ) {
-            Box(
-                modifier = Modifier
-                    .matchParentSize()
-                    .background(
-                        Brush.verticalGradient(
-                            colors = listOf(
-                                Color.White.copy(alpha = 0.33f),
-                                Color(0xFFACE3FF).copy(alpha = 0.12f),
-                                Color.Transparent
-                            ),
-                            startY = 0f,
-                            endY = Float.POSITIVE_INFINITY
-                        )
-                    )
-            )
-            Box(
-                modifier = Modifier
-                    .matchParentSize()
-                    .background(Color.White.copy(alpha = 0.14f))
-            )
-        }
+
 
         Row(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 22.dp),
+                .padding(horizontal = 0.dp), // 22 лучше
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
