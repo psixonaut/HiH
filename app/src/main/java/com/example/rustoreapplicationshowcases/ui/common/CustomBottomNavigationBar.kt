@@ -1,18 +1,30 @@
 package com.example.rustoreapplicationshowcases.ui.common
 
+import android.os.Build
+import android.graphics.RenderEffect
+import android.graphics.Shader
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.graphics.asComposeRenderEffect
 
 @Composable
 fun CustomBottomNavigationBar(
@@ -20,125 +32,108 @@ fun CustomBottomNavigationBar(
     onTabSelected: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    // Цвета для навигационной панели
-    val lightLavender = Color(0xFFE8D5FF) // Светло-лавандовый фон
-    val darkPurple = Color(0xFF6200EE) // Тёмно-фиолетовый для иконок и активного фона
-
-    Row(
+    Box(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 25.dp)
-            .clip(RoundedCornerShape(50.dp))
-            .background(lightLavender)
-            .padding(horizontal = 5.dp, vertical = 5.dp),
-        horizontalArrangement = Arrangement.SpaceEvenly,
-        verticalAlignment = Alignment.CenterVertically
+            .padding(horizontal = 64.dp, vertical = 25.dp)
+            .height(80.dp)
+            .clickable(enabled = false, onClick = {}) // блокировка сквозных кликов
     ) {
-        // Home Icon
+
+        // ---- iOS Стеклянный фон (фейковый блюр) ----
         Box(
             modifier = Modifier
-                .weight(1f),
-            contentAlignment = Alignment.Center
+                .matchParentSize()
+                .clip(RoundedCornerShape(45.dp))
+                .then(
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                        Modifier.graphicsLayer {
+                            renderEffect = RenderEffect.createBlurEffect(
+                                36f, 36f, Shader.TileMode.CLAMP
+                            ).asComposeRenderEffect()
+                        }
+                    } else Modifier
+                )
         ) {
-            if (selectedTab == "home") {
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(darkPurple)
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Home,
-                        contentDescription = "Главная",
-                        tint = Color.White,
-                        modifier = Modifier.size(24.dp)
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .background(
+                        Brush.verticalGradient(
+                            colors = listOf(
+                                Color.White.copy(alpha = 0.33f),
+                                Color(0xFFACE3FF).copy(alpha = 0.12f),
+                                Color.Transparent
+                            ),
+                            startY = 0f,
+                            endY = Float.POSITIVE_INFINITY
+                        )
                     )
-                }
-            } else {
-                IconButton(
-                    onClick = { onTabSelected("home") },
-                    modifier = Modifier.size(40.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Home,
-                        contentDescription = "Главная",
-                        tint = darkPurple,
-                        modifier = Modifier.size(24.dp)
-                    )
-                }
-            }
+            )
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .background(Color.White.copy(alpha = 0.14f))
+            )
         }
 
-        // Search Icon
-        Box(
+        Row(
             modifier = Modifier
-                .weight(1f),
-            contentAlignment = Alignment.Center
+                .fillMaxSize()
+                .padding(horizontal = 22.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            if (selectedTab == "search") {
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(darkPurple)
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                        .clickable { onTabSelected("search") }
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Search,
-                        contentDescription = "Поиск",
-                        tint = Color.White,
-                        modifier = Modifier.size(24.dp)
-                    )
-                }
-            } else {
-                IconButton(
-                    onClick = { onTabSelected("search") },
-                    modifier = Modifier.size(40.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Search,
-                        contentDescription = "Поиск",
-                        tint = darkPurple,
-                        modifier = Modifier.size(24.dp)
-                    )
-                }
-            }
-        }
-
-        // Profile Icon
-        Box(
-            modifier = Modifier
-                .weight(1f),
-            contentAlignment = Alignment.Center
-        ) {
-            if (selectedTab == "profile") {
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(darkPurple)
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Person,
-                        contentDescription = "Профиль",
-                        tint = Color.White,
-                        modifier = Modifier.size(24.dp)
-                    )
-                }
-            } else {
-                IconButton(
-                    onClick = { onTabSelected("profile") },
-                    modifier = Modifier.size(40.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Person,
-                        contentDescription = "Профиль",
-                        tint = darkPurple,
-                        modifier = Modifier.size(24.dp)
-                    )
-                }
-            }
+            NavItem("home", Icons.Default.Home, selectedTab, onTabSelected)
+            NavItem("search", Icons.Default.Search, selectedTab, onTabSelected)
+            NavItem("profile", Icons.Default.Person, selectedTab, onTabSelected)
         }
     }
 }
 
+@Composable
+fun NavItem(
+    id: String,
+    icon: ImageVector,
+    selected: String,
+    onSelect: (String) -> Unit
+) {
+    val isSelected = id == selected
+
+    val scale by animateFloatAsState(
+        targetValue = if (isSelected) 1.25f else 1f,
+        label = "scale"
+    )
+
+    Box(
+        modifier = Modifier.size(55.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        // Подсветка под активной кнопкой
+        if (isSelected) {
+            Box(
+                modifier = Modifier
+                    .size(55.dp)
+                    .clip(CircleShape)
+                    .blur(20.dp)
+                    .background(Color.White.copy(0.28f))
+            )
+        }
+
+        Icon(
+            imageVector = icon,
+            contentDescription = id,
+            tint = if (isSelected)
+                MaterialTheme.colorScheme.primary
+            else
+                Color.Black.copy(alpha = 0.65f),
+            modifier = Modifier
+                .size(28.dp)
+                .graphicsLayer {
+                    scaleX = scale
+                    scaleY = scale
+                }
+                .clickable { onSelect(id) }
+        )
+    }
+}
