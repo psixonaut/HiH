@@ -1,11 +1,6 @@
 package com.example.rustoreapplicationshowcases.ui.profile
 
-import android.app.Activity
 import android.app.Application
-import android.graphics.drawable.GradientDrawable
-import android.os.Build
-import android.view.ViewGroup
-import android.view.ViewOutlineProvider
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -21,24 +16,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.rustoreapplicationshowcases.AppViewModelFactory
 import com.example.rustoreapplicationshowcases.R
 import com.example.rustoreapplicationshowcases.data.model.AppInfo
+import com.example.rustoreapplicationshowcases.ui.common.BottomBlurBar
+import com.example.rustoreapplicationshowcases.ui.common.CustomBottomNavigationBar
 import com.example.rustoreapplicationshowcases.ui.home.AppCard
 import com.example.rustoreapplicationshowcases.ui.home.HomeViewModel
-import com.example.rustoreapplicationshowcases.ui.common.CustomBottomNavigationBar
-import eightbitlab.com.blurview.BlurView
-import eightbitlab.com.blurview.RenderScriptBlur
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -94,50 +85,11 @@ fun ProfileScreen(
                 modifier = Modifier.fillMaxWidth(),
                 contentAlignment = Alignment.BottomCenter
             ) {
-                // ---------- BLUR BACKGROUND ----------
-                val barHeight = 80.dp
-                val corner = barHeight / 2
-                val cornerPx = with(LocalDensity.current) { corner.toPx() }
-
-                AndroidView(
-                    factory = { context ->
-                        val activity = context as Activity
-                        val rootView =
-                            activity.window.decorView.findViewById<ViewGroup>(android.R.id.content)
-
-                        val blur = BlurView(context)
-
-                        // Capsule форма (полукруги)
-                        val drawable = GradientDrawable().apply {
-                            shape = GradientDrawable.RECTANGLE
-                            cornerRadius = cornerPx       // ← важно: высота/2
-                            setColor(android.graphics.Color.TRANSPARENT)
-                        }
-
-                        blur.apply {
-                            setupWith(rootView)
-                                .setBlurAlgorithm(RenderScriptBlur(context))
-                                .setBlurRadius(18f) // лучше 22
-                                .setBlurAutoUpdate(true)
-
-                            setOverlayColor(Color.White.copy(alpha = 0.14f).toArgb())
-
-                            background = drawable
-
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                                clipToOutline = true
-                                outlineProvider = ViewOutlineProvider.BACKGROUND
-                            }
-                        }
-
-                        blur
-                    },
+                // ---------- BLUR BAR (кастомный, безопасный) ----------
+                BottomBlurBar(
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
-                        .padding(horizontal = 10.dp, vertical = 24.dp) // horizontal лучше 70
-                        .fillMaxWidth()
-                        .height(barHeight)
-                        .clip(RoundedCornerShape(corner))   // ← Compose-обрезка тоже capsule
+                        .padding(horizontal = 10.dp, vertical = 24.dp)
                 )
 
                 CustomBottomNavigationBar(
